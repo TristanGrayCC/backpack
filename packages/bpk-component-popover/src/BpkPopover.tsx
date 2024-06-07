@@ -17,7 +17,13 @@
  */
 
 import type { SyntheticEvent, ReactNode, ReactElement } from 'react';
-import { useState, useEffect, useRef, cloneElement, isValidElement } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  cloneElement,
+  isValidElement,
+} from 'react';
 
 import {
   useFloating,
@@ -30,8 +36,8 @@ import {
   arrow,
   FloatingArrow,
   shift,
+  useHover,
 } from '@floating-ui/react';
-
 
 import { surfaceHighlightDay } from '@skyscanner/bpk-foundations-web/tokens/base.es6';
 
@@ -70,16 +76,16 @@ const bindEventSource = (
   callback(event, { source });
 };
 
-type CloseButtonProps = (
-  {
- /**
-  * @deprecated close button text is deprecated. Instead, please use `closeButtonIcon`, or you may opt not to render a close button at all.
-  */
-    closeButtonText: string;
-  } | {
-    closeButtonText?: never;
-  }
-);
+type CloseButtonProps =
+  | {
+      /**
+       * @deprecated close button text is deprecated. Instead, please use `closeButtonIcon`, or you may opt not to render a close button at all.
+       */
+      closeButtonText: string;
+    }
+  | {
+      closeButtonText?: never;
+    };
 
 export type Props = CloseButtonProps & {
   children: ReactNode;
@@ -92,6 +98,7 @@ export type Props = CloseButtonProps & {
   className?: string | null;
   closeButtonIcon?: boolean;
   closeButtonProps?: Object;
+  hoverable?: boolean;
   isOpen?: boolean;
   labelAsTitle?: boolean;
   padded?: boolean;
@@ -111,6 +118,7 @@ const BpkPopover = ({
   closeButtonLabel,
   closeButtonProps = {},
   closeButtonText,
+  hoverable = false,
   id,
   isOpen = false,
   label,
@@ -127,7 +135,7 @@ const BpkPopover = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setIsOpenState(false)
+      setIsOpenState(false);
     }
   }, [isOpen]);
 
@@ -147,12 +155,13 @@ const BpkPopover = ({
 
   const click = useClick(context);
   const dismiss = useDismiss(context);
+  const hover = useHover(context, {
+    enabled: hoverable,
+    mouseOnly: true
+  });
 
   // Merge all the interactions into prop getters
-  const { getFloatingProps, getReferenceProps } = useInteractions([
-    click,
-    dismiss,
-  ]);
+  const { getFloatingProps, getReferenceProps } = useInteractions([click, dismiss, hover]);
 
   const targetElement = isValidElement(target) ? (
     cloneElement(target, {
@@ -231,7 +240,9 @@ const BpkPopover = ({
                     ) : (
                       closeButtonText && (
                         <BpkButtonLink
-                          onClick={(event: SyntheticEvent<HTMLButtonElement>) => {
+                          onClick={(
+                            event: SyntheticEvent<HTMLButtonElement>,
+                          ) => {
                             bindEventSource(
                               EVENT_SOURCES.CLOSE_LINK,
                               onClose,
@@ -257,12 +268,10 @@ const BpkPopover = ({
                 <div className={bodyClassNames}>{children}</div>
                 {actionText && onAction && (
                   <div className={getClassName('bpk-popover__action')}>
-                    <BpkButtonLink
-                      onClick={onAction}
-                    >
+                    <BpkButtonLink onClick={onAction}>
                       {actionText}
                     </BpkButtonLink>
-                </div>
+                  </div>
                 )}
                 {!labelAsTitle && closeButtonText && (
                   <footer className={getClassName('bpk-popover__footer')}>

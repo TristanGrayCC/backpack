@@ -21,6 +21,7 @@ import BpkPopover from '../../packages/bpk-component-popover';
 
 import {
   DefaultExample,
+  HoverExample,
   WithoutArrowExample,
   WithLabelAsTitleExample,
   OnTheSideExample,
@@ -36,6 +37,7 @@ export default {
 };
 
 export const Default = DefaultExample;
+export const Hover = HoverExample;
 export const WithoutArrow = WithoutArrowExample;
 export const WithLabelAsTitle = WithLabelAsTitleExample;
 export const WithNoCloseButtonIcon =
